@@ -1,4 +1,5 @@
 # Production Dockerfile for Render.com
+# Build: 2026-02-25-v2 (force cache bust)
 FROM php:8.3-fpm-alpine
 
 # Install system dependencies
@@ -15,7 +16,9 @@ RUN echo "expose_php = Off" >> /usr/local/etc/php/conf.d/security.ini \
     && echo "log_errors = On" >> /usr/local/etc/php/conf.d/security.ini
 
 # Configure PHP-FPM to use Unix socket
-RUN mkdir -p /run/php && \
+# Remove all default configs first to avoid conflicts
+RUN rm -f /usr/local/etc/php-fpm.d/*.conf && \
+    mkdir -p /run/php && \
     echo "[www]" > /usr/local/etc/php-fpm.d/zz-docker.conf \
     && echo "listen = /run/php/php-fpm.sock" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
     && echo "listen.owner = nobody" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
