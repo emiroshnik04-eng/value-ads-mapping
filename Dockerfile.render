@@ -14,9 +14,13 @@ RUN echo "expose_php = Off" >> /usr/local/etc/php/conf.d/security.ini \
     && echo "display_errors = Off" >> /usr/local/etc/php/conf.d/security.ini \
     && echo "log_errors = On" >> /usr/local/etc/php/conf.d/security.ini
 
-# Configure PHP-FPM
-RUN echo "[www]" > /usr/local/etc/php-fpm.d/zz-docker.conf \
-    && echo "listen = 127.0.0.1:9001" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
+# Configure PHP-FPM to use Unix socket
+RUN mkdir -p /run/php && \
+    echo "[www]" > /usr/local/etc/php-fpm.d/zz-docker.conf \
+    && echo "listen = /run/php/php-fpm.sock" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
+    && echo "listen.owner = nobody" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
+    && echo "listen.group = nobody" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
+    && echo "listen.mode = 0660" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
     && echo "pm = dynamic" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
     && echo "pm.max_children = 5" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
     && echo "pm.start_servers = 2" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
@@ -39,7 +43,7 @@ server {
     }
 
     location ~ \.php$ {
-        fastcgi_pass 127.0.0.1:9001;
+        fastcgi_pass unix:/run/php/php-fpm.sock;
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         include fastcgi_params;
@@ -60,7 +64,8 @@ logfile=/dev/stdout
 logfile_maxbytes=0
 
 [program:php-fpm]
-command=php-fpm
+command=php-fpm -F
+user=nobody
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
