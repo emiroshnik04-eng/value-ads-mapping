@@ -16,5 +16,5 @@ services:
       - key: DB_USER
         value: ekaterina_miroshnik
       - key: DB_PASSWORD
-        sync: false  # Will be set manually in Render dashboard
+        value: jY8I8cRwaSlXHoR75j2tpQGDkqgxVcqf
     healthCheckPath: /test-db.php
