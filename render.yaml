@@ -17,4 +17,4 @@ services:
         value: ekaterina_miroshnik
       - key: DB_PASSWORD
         value: jY8I8cRwaSlXHoR75j2tpQGDkqgxVcqf
-    healthCheckPath: /test-db.php
+    healthCheckPath: /health.php
