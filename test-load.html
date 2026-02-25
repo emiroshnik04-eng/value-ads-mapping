@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Category Loading</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Category Loading</h1>
+
+    <div class="test-section">
+        <h2>Test 1: API Direct Call</h2>
+        <button onclick="testAPI()">Test API</button>
+        <div id="apiResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Category Select</h2>
+        <label>Country:</label>
+        <select id="country">
+            <option value="">Select...</option>
+            <option value="12">Kyrgyzstan (12)</option>
+        </select>
+        <br><br>
+        <label>Category:</label>
+        <select id="category" disabled>
+            <option value="">Select category...</option>
+        </select>
+        <div id="selectResult"></div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        async function testAPI() {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.innerHTML = '<p>Loading...</p>';
+
+            try {
+                const url = `${API_BASE}/get-categories.php?country_id=12`;
+                console.log('Fetching:', url);
+
+                const response = await fetch(url);
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+
+                const text = await response.text();
+                console.log('Response text:', text.substring(0, 200));
+
+                const result = JSON.parse(text);
+                console.log('Parsed result:', result);
+
+                resultDiv.className = 'success';
+                resultDiv.innerHTML = `
+                    <p><strong>Success!</strong></p>
+                    <p>Count: ${result.count || result.data?.length}</p>
+                    <p>First 3 categories:</p>
+                    <pre>${JSON.stringify(result.data?.slice(0, 3) || result.slice(0, 3), null, 2)}</pre>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.className = 'error';
+                resultDiv.innerHTML = `
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <pre>${error.stack}</pre>
+                `;
+            }
+        }
+
+        // Country change handler
+        document.getElementById('country').addEventListener('change', async () => {
+            const countryId = document.getElementById('country').value;
+            const categorySelect = document.getElementById('category');
+            const resultDiv = document.getElementById('selectResult');
+
+            if (!countryId) {
+                categorySelect.disabled = true;
+                return;
+            }
+
+            resultDiv.innerHTML = '<p>Loading categories...</p>';
+
+            try {
+                const url = `${API_BASE}/get-categories.php?country_id=${countryId}`;
+                console.log('Loading categories from:', url);
+
+                const response = await fetch(url);
+                console.log('Categories response:', response.status);
+
+                const result = await response.json();
+                console.log('Categories result:', result);
+
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to load categories');
+                }
+
+                const data = result.data;
+
+                categorySelect.innerHTML = '<option value="">Select category...</option>';
+                data.forEach(cat => {
+                    categorySelect.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+                });
+
+                categorySelect.disabled = false;
+                resultDiv.innerHTML = `<p class="success">Loaded ${data.length} categories</p>`;
+
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Param Values Loading</title>
+</head>
+<body>
+    <h1>Test Parameter Values Loading</h1>
+
+    <label>Country ID: <input type="number" id="countryId" value="12"></label><br><br>
+    <label>Param ID: <input type="number" id="paramId" value="1071"></label><br><br>
+
+    <button onclick="testLoad()">Load Values</button>
+
+    <h2>Result:</h2>
+    <pre id="result"></pre>
+
+    <h2>Select Test:</h2>
+    <select id="testSelect" multiple style="width: 400px; height: 300px;"></select>
+
+    <script>
+        async function testLoad() {
+            const countryId = document.getElementById('countryId').value;
+            const paramId = document.getElementById('paramId').value;
+            const resultDiv = document.getElementById('result');
+            const selectEl = document.getElementById('testSelect');
+
+            resultDiv.textContent = 'Loading...';
+            selectEl.innerHTML = '<option>Loading...</option>';
+
+            try {
+                const url = `get-param-values.php?country_id=${countryId}&param_id=${paramId}`;
+                console.log('Fetching:', url);
+
+                const response = await fetch(url);
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+
+                const data = await response.json();
+                console.log('Data:', data);
+
+                resultDiv.textContent = JSON.stringify({
+                    status: response.status,
+                    ok: response.ok,
+                    dataType: Array.isArray(data) ? 'array' : typeof data,
+                    dataLength: data?.length,
+                    firstItem: data[0]
+                }, null, 2);
+
+                if (response.ok && Array.isArray(data) && data.length > 0) {
+                    selectEl.innerHTML = '';
+                    data.forEach(value => {
+                        const option = document.createElement('option');
+                        option.value = value.id;
+                        option.textContent = `${value.display_value} (${value.usage_count} ads)`;
+                        selectEl.appendChild(option);
+                    });
+                    console.log(`✅ Loaded ${data.length} values`);
+                } else {
+                    selectEl.innerHTML = '<option>No data</option>';
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.textContent = 'ERROR: ' + error.message;
+                selectEl.innerHTML = '<option>Error loading</option>';
+            }
+        }
+
+        // Auto-load on page load
+        window.addEventListener('load', testLoad);
+    </script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        select { width: 300px; padding: 8px; margin: 10px 0; display: block; }
+        button { padding: 10px 20px; margin: 10px 0; }
+        #log { background: #f5f5f5; padding: 10px; border: 1px solid #ddd; margin-top: 20px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>Simple Category Test</h1>
+
+    <button onclick="testAPI()">Test Get Categories API</button>
+
+    <hr>
+
+    <label>Country:</label>
+    <select id="country" onchange="loadCategories()">
+        <option value="">Select...</option>
+        <option value="12">Kyrgyzstan (12)</option>
+        <option value="13">Serbia (13)</option>
+    </select>
+
+    <label>Category:</label>
+    <select id="category" size="10">
+        <option>Select country first...</option>
+    </select>
+
+    <div id="log"></div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.textContent += `[${timestamp}] ${message}\n`;
+            console.log(message);
+        }
+
+        async function testAPI() {
+            log('Testing API directly...');
+            try {
+                const url = 'http://localhost:8888/get-categories.php?country_id=12';
+                log('Fetching: ' + url);
+
+                const response = await fetch(url);
+                log('Response status: ' + response.status);
+
+                const text = await response.text();
+                log('Response length: ' + text.length + ' bytes');
+
+                const data = JSON.parse(text);
+                log('Parsed JSON successfully');
+                log('Success: ' + data.success);
+                log('Count: ' + (data.count || data.data?.length));
+                log('First category: ' + JSON.stringify(data.data[0]));
+
+            } catch (error) {
+                log('ERROR: ' + error.message);
+                log('Stack: ' + error.stack);
+            }
+        }
+
+        async function loadCategories() {
+            const countrySelect = document.getElementById('country');
+            const categorySelect = document.getElementById('category');
+            const countryId = countrySelect.value;
+
+            if (!countryId) {
+                categorySelect.innerHTML = '<option>Select country first...</option>';
+                return;
+            }
+
+            log('Loading categories for country: ' + countryId);
+            categorySelect.innerHTML = '<option>Loading...</option>';
+
+            try {
+                const url = `http://localhost:8888/get-categories.php?country_id=${countryId}`;
+                log('Fetching: ' + url);
+
+                const startTime = Date.now();
+                const response = await fetch(url);
+                log('Fetch completed in ' + (Date.now() - startTime) + 'ms');
+
+                const result = await response.json();
+                log('JSON parsed, count: ' + result.data.length);
+
+                if (!result.success) {
+                    throw new Error(result.error || 'API returned success=false');
+                }
+
+                const data = result.data;
+                log('Building options array...');
+
+                const options = ['<option value="">-- Select category --</option>'];
+                for (let i = 0; i < data.length; i++) {
+                    options.push(`<option value="${data[i].id}">${data[i].name}</option>`);
+                }
+
+                log('Setting innerHTML...');
+                const buildTime = Date.now();
+                categorySelect.innerHTML = options.join('');
+                log('innerHTML set in ' + (Date.now() - buildTime) + 'ms');
+
+                log('SUCCESS! Loaded ' + data.length + ' categories');
+
+            } catch (error) {
+                log('ERROR: ' + error.message);
+                categorySelect.innerHTML = '<option>Error: ' + error.message + '</option>';
+            }
+        }
+    </script>
+</body>
+</html>

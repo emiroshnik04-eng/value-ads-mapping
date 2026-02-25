@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ads Parameter Matcher - Admin (DEMO)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f7f7f9;
+            padding: 0;
+            margin: 0;
+        }
+
+        .top-bar {
+            background: #fff;
+            border-bottom: 1px solid #e7e7e9;
+            padding: 16px 32px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+
+        .demo-banner {
+            background: linear-gradient(135deg, #ff9100 0%, #ff6900 100%);
+            color: white;
+            padding: 20px 24px;
+            border-radius: 12px;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 12px rgba(255, 145, 0, 0.2);
+        }
+
+        .demo-banner strong {
+            color: white;
+            font-weight: 600;
+        }
+
+        h1 {
+            color: #2f2f2f;
+            margin-bottom: 8px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            color: #6e6e73;
+            margin-bottom: 24px;
+            font-size: 15px;
+        }
+
+        .filters {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 24px;
+            border: 1px solid #f0f0f2;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #2f2f2f;
+            font-size: 14px;
+            display: block;
+        }
+
+        select, input {
+            padding: 12px 16px;
+            border: 1px solid #e0e0e4;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #4caf50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        select:disabled, input:disabled {
+            background: #f7f7f9;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        button {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-primary:disabled {
+            background: #e0e0e4;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #4caf50;
+            border: 2px solid #4caf50;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #4caf50;
+            color: white;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .results {
+            background: white;
+            padding: 0;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            overflow: hidden;
+            border: 1px solid #f0f0f2;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f2;
+        }
+
+        th {
+            background: #f7f7f9;
+            font-weight: 500;
+            color: #2f2f2f;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background: #f7f9fa;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .ad-link {
+            color: #4caf50;
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .ad-link:hover {
+            color: #45a049;
+            text-decoration: underline;
+        }
+
+        .match-count {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .match-count.single {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+
+        .match-count.multiple {
+            background: #fff3e0;
+            color: #e65100;
+            border: 1px solid #ffe0b2;
+        }
+
+        .chip {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid #c8e6c9;
+            display: inline-block;
+            margin-right: 6px;
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <div style="max-width: 1400px; margin: 0 auto; display: flex; align-items: center; gap: 12px;">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="16" fill="#4CAF50"/>
+                <path d="M10 16L14 20L22 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span style="font-size: 18px; font-weight: 600; color: #2f2f2f;">Lalafo Admin</span>
+            <span style="color: #9e9e9e; margin-left: 8px;">|</span>
+            <span style="color: #6e6e73; font-size: 15px;">Ads Parameter Matcher</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="demo-banner" id="statusBanner" style="background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);">
+            <strong>✅ REAL DATA MODE</strong> — All data loaded from production database.
+            <br>✅ Real categories validation | ✅ Real parameters & values | ✅ Real ad search
+        </div>
+
+        <h1>Ads Parameter Matcher</h1>
+        <p class="subtitle">Find ads that mention parameter values in title/description but don't have those parameters linked</p>
+        <p style="color: #6e6e73; margin-bottom: 24px; font-size: 14px;">
+            <strong style="color: #4caf50;">⚡ Quick test:</strong> Select <strong>Country 12</strong> → Enter Category ID: <strong>1343</strong> → Choose params
+            <br>
+            <span style="font-size: 12px; color: #999;">Category 1343 = Laptops (75K ads, 28 real parameters from actual ads)</span>
+        </p>
+
+        <div class="filters">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="country">Country</label>
+                    <select id="country">
+                        <option value="">Select country...</option>
+                        <option value="12">Country 12 (13.3M ads - best data)</option>
+                        <option value="11">Country 11 (1.1M ads)</option>
+                        <option value="13">Country 13 (10.4M ads)</option>
+                        <option value="14">Country 14 (1.2M ads)</option>
+                        <option value="1">Kyrgyzstan - KG (87K ads - limited)</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="categorySearch">Search by Category ID</label>
+                    <input type="number" id="categorySearch" placeholder="Enter category ID (e.g. 1343, 1361)..." disabled>
+                    <div style="margin-top: 8px; font-size: 12px; color: #6e6e73;">
+                        Quick test:
+                        <a href="#" onclick="event.preventDefault(); tryCategory('1343')" style="color: #4caf50; text-decoration: none; font-weight: 500;">1343</a> (Laptops),
+                        <a href="#" onclick="event.preventDefault(); tryCategory('1361')" style="color: #4caf50; text-decoration: none; font-weight: 500;">1361</a> (Phones)
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label for="categoryName">Selected Category</label>
+                    <input type="text" id="categoryName" placeholder="Select category by ID first..." disabled readonly style="background: #f9f9f9;">
+                </div>
+
+                <div class="filter-group">
+                    <label for="param">Parameter</label>
+                    <select id="param" disabled>
+                        <option value="">Select parameter...</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="paramValues">Parameter Values (multiple)</label>
+                    <select id="paramValues" multiple disabled style="height: 120px;">
+                    </select>
+                </div>
+            </div>
+
+            <button id="searchBtn" class="btn-primary" onclick="searchDemo()">Search Ads</button>
+        </div>
+
+        <div class="actions">
+            <div>
+                <span id="resultsCount" style="color: #666;">No search yet</span>
+            </div>
+            <button class="btn-secondary" onclick="exportDemo()">Export CSV</button>
+        </div>
+
+        <div class="results">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ad ID</th>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Matched Values</th>
+                        <th>Match Count</th>
+                        <th>Created Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsTable">
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #6e6e73;">
+                            Select filters and click "Search Ads (DEMO)" to see results
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Store last search results for export
+        let lastSearchResults = [];
+
+        // Helper function for quick start links
+        function tryCategory(categoryId) {
+            const countrySelect = document.getElementById('country');
+            const categorySearch = document.getElementById('categorySearch');
+
+            // Auto-select Country 12 if no country selected (best data)
+            if (!countrySelect.value) {
+                countrySelect.value = '12';
+                countrySelect.dispatchEvent(new Event('change'));
+            }
+
+            // Set category ID
+            setTimeout(() => {
+                categorySearch.value = categoryId;
+                categorySearch.dispatchEvent(new Event('input'));
+            }, 100);
+        }
+
+        // Mock data for fallback only
+        const mockData = {
+            params: {
+                '1361': [ // Мобильные телефоны (KG) - REAL ID
+                    {id: 1, name: 'Бренд'},
+                    {id: 2, name: 'Состояние'},
+                    {id: 3, name: 'Память'},
+                    {id: 4, name: 'Цвет'}
+                ],
+                '1345': [ // Планшеты (KG) - REAL ID
+                    {id: 1, name: 'Бренд'},
+                    {id: 2, name: 'Состояние'},
+                    {id: 3, name: 'Память'}
+                ],
+                '1342': [ // Ноутбуки (KG) - REAL ID
+                    {id: 1, name: 'Бренд'},
+                    {id: 2, name: 'Состояние'},
+                    {id: 5, name: 'Процессор'},
+                    {id: 6, name: 'RAM'}
+                ],
+                '1543': [ // Легковые авто (KG) - REAL ID
+                    {id: 11, name: 'Марка'},
+                    {id: 12, name: 'Модель'},
+                    {id: 13, name: 'Год выпуска'},
+                    {id: 14, name: 'Пробег'}
+                ],
+                '7859': [ // Baby monitors
+                    {id: 20, name: 'Brand'},
+                    {id: 21, name: 'Condition'},
+                    {id: 22, name: 'Type'}
+                ],
+                '2185': [ // Mobilni telefoni (RS)
+                    {id: 1, name: 'Marka'},
+                    {id: 2, name: 'Stanje'},
+                    {id: 3, name: 'Memorija'}
+                ],
+                '3185': [ // Telefony (PL)
+                    {id: 1, name: 'Marka'},
+                    {id: 2, name: 'Stan'},
+                    {id: 3, name: 'Pamięć'}
+                ],
+                '4185': [ // Mobil telefonlar (AZ)
+                    {id: 1, name: 'Marka'},
+                    {id: 2, name: 'Vəziyyət'},
+                    {id: 3, name: 'Yaddaş'}
+                ]
+            },
+            paramValues: {
+                '1': [ // Бренд (KG)
+                    {id: 10, value: 'Samsung'},
+                    {id: 11, value: 'Apple'},
+                    {id: 12, value: 'Xiaomi'},
+                    {id: 13, value: 'Huawei'},
+                    {id: 14, value: 'Nokia'},
+                    {id: 15, value: 'LG'},
+                    {id: 16, value: 'Sony'},
+                    {id: 17, value: 'Oppo'},
+                    {id: 18, value: 'Vivo'},
+                    {id: 19, value: 'Realme'}
+                ],
+                '2': [ // Состояние (KG)
+                    {id: 24, value: 'Новое'},
+                    {id: 25, value: 'Б/У'},
+                    {id: 26, value: 'Отличное'},
+                    {id: 27, value: 'Хорошее'}
+                ],
+                '20': [ // Brand (Baby monitors)
+                    {id: 200, value: 'Philips Avent'},
+                    {id: 201, value: 'Motorola'},
+                    {id: 202, value: 'Angelcare'},
+                    {id: 203, value: 'Safety 1st'},
+                    {id: 204, value: 'Infant Optics'}
+                ],
+                '21': [ // Condition (Baby monitors)
+                    {id: 210, value: 'New'},
+                    {id: 211, value: 'Used'},
+                    {id: 212, value: 'Like New'}
+                ],
+                '22': [ // Type (Baby monitors)
+                    {id: 220, value: 'Audio'},
+                    {id: 221, value: 'Video'},
+                    {id: 222, value: 'Movement'},
+                    {id: 223, value: 'WiFi'}
+                ],
+                '11': [ // Marka (RS)
+                    {id: 110, value: 'Samsung'},
+                    {id: 111, value: 'Apple'},
+                    {id: 112, value: 'Xiaomi'}
+                ],
+                '21': [ // Marka (PL)
+                    {id: 210, value: 'Samsung'},
+                    {id: 211, value: 'Apple'},
+                    {id: 212, value: 'Xiaomi'}
+                ],
+                '31': [ // Marka (AZ)
+                    {id: 310, value: 'Samsung'},
+                    {id: 311, value: 'Apple'},
+                    {id: 312, value: 'Xiaomi'}
+                ]
+            }
+        };
+
+        // Enable category search when country changes
+        document.getElementById('country').addEventListener('change', function() {
+            const countryId = this.value;
+            const categorySearch = document.getElementById('categorySearch');
+            const categoryName = document.getElementById('categoryName');
+            const paramSelect = document.getElementById('param');
+            const paramValuesSelect = document.getElementById('paramValues');
+
+            // Reset all fields
+            categorySearch.value = '';
+            categoryName.value = '';
+            paramSelect.disabled = true;
+            paramSelect.innerHTML = '<option value="">Select parameter...</option>';
+            paramValuesSelect.disabled = true;
+            paramValuesSelect.innerHTML = '';
+
+            if (!countryId) {
+                categorySearch.disabled = true;
+                categoryName.disabled = true;
+                return;
+            }
+
+            // Enable category search (no dropdown - too many categories)
+            categorySearch.disabled = false;
+            categoryName.disabled = true;
+        });
+
+        // Handle category search by ID
+        document.getElementById('categorySearch').addEventListener('input', async function() {
+            const categoryId = this.value;
+            const categoryName = document.getElementById('categoryName');
+            const paramSelect = document.getElementById('param');
+            const countrySelect = document.getElementById('country');
+
+            if (!categoryId) {
+                categoryName.value = '';
+                paramSelect.disabled = true;
+                return;
+            }
+
+            // Show loading
+            categoryName.value = 'Loading...';
+            categoryName.style.color = '#999';
+
+            try {
+                // Fetch category from API (with country_id for translations if available)
+                const countryId = countrySelect.value;
+                const url = `get-category.php?category_id=${categoryId}${countryId ? `&country_id=${countryId}` : ''}`;
+
+                console.log('Fetching category:', url); // Debug log
+
+                const response = await fetch(url);
+                const category = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(category.error || 'Category not found');
+                }
+
+                // Display category info with translation
+                const displayName = category.name_translated || category.name;
+                const adsInfo = category.ads_count > 0 ? ` (${category.ads_count.toLocaleString()} ads)` : '';
+                categoryName.value = `${displayName}${adsInfo}`;
+                categoryName.style.color = '#333';
+
+                // Load parameters if category has ads
+                if (category.ads_count > 0) {
+                    loadParams(categoryId);
+                } else {
+                    paramSelect.disabled = true;
+                    paramSelect.innerHTML = '<option value="">Select parameter...</option>';
+                    console.warn(`Category ${categoryId} has no ads.`);
+                }
+
+            } catch (error) {
+                categoryName.value = `❌ Category ${categoryId} not found. Try: 1343, 1361, 1543, 1345`;
+                categoryName.style.color = '#d32f2f';
+                paramSelect.disabled = true;
+                paramSelect.innerHTML = '<option value="">Select parameter...</option>';
+                console.error('Category fetch error:', error);
+            }
+        });
+
+        async function loadParams(categoryId) {
+            const countryId = document.getElementById('country').value;
+            const paramSelect = document.getElementById('param');
+            const paramValuesSelect = document.getElementById('paramValues');
+
+            if (!categoryId) {
+                paramSelect.disabled = true;
+                paramSelect.innerHTML = '<option value="">Select parameter...</option>';
+                paramValuesSelect.disabled = true;
+                paramValuesSelect.innerHTML = '';
+                return;
+            }
+
+            // Check if country is selected
+            if (!countryId) {
+                paramSelect.disabled = true;
+                paramSelect.innerHTML = '<option value="">⚠️ Please select Country first</option>';
+                paramValuesSelect.disabled = true;
+                paramValuesSelect.innerHTML = '';
+                console.warn('Country must be selected before loading params');
+                return;
+            }
+
+            // Show loading
+            paramSelect.innerHTML = '<option value="">Loading parameters...</option>';
+            paramSelect.disabled = true;
+
+            // Try to load real parameters from DB
+            try {
+                const response = await fetch(`get-params.php?country_id=${countryId}&category_id=${categoryId}`);
+                const data = await response.json();
+
+                if (response.ok && data.length > 0) {
+                    // Real data loaded successfully
+                    paramSelect.innerHTML = '<option value="">Select parameter...</option>';
+                    data.forEach(param => {
+                        // Use translated name if available, otherwise use original name
+                        const displayName = param.name_translated || param.name;
+                        paramSelect.innerHTML += `<option value="${param.id}">${displayName}</option>`;
+                    });
+                    paramSelect.disabled = false;
+                    console.log(`✅ Loaded ${data.length} real parameters for category ${categoryId}`);
+                    return;
+                }
+            } catch (error) {
+                console.warn('Failed to load real parameters, using mock data:', error);
+            }
+
+            // Fallback to mock data
+            const params = mockData.params[categoryId] || [];
+            paramSelect.innerHTML = '<option value="">Select parameter...</option>';
+            params.forEach(param => {
+                paramSelect.innerHTML += `<option value="${param.id}">${param.name} (MOCK)</option>`;
+            });
+            paramSelect.disabled = params.length === 0;
+            paramValuesSelect.disabled = true;
+            paramValuesSelect.innerHTML = '';
+
+            if (params.length > 0) {
+                console.log(`⚠️ Using ${params.length} mock parameters for category ${categoryId}`);
+            } else {
+                console.warn(`❌ No mock parameters found for category ${categoryId}`);
+            }
+        }
+
+
+        // Load param values when param changes
+        document.getElementById('param').addEventListener('change', async function() {
+            const countryId = document.getElementById('country').value;
+            const categoryId = document.getElementById('categorySearch').value;
+            const paramId = this.value;
+            const paramValuesSelect = document.getElementById('paramValues');
+
+            if (!paramId || !categoryId) {
+                paramValuesSelect.disabled = true;
+                paramValuesSelect.innerHTML = '';
+                return;
+            }
+
+            // Show loading
+            paramValuesSelect.innerHTML = '<option value="">⏳ Loading values (may take 15-20 sec due to missing DB index)...</option>';
+            paramValuesSelect.disabled = true;
+
+            // Try to load real param values from DB
+            // NOTE: This may take 15-20 seconds due to missing database index on ad_param.param_id
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+                const response = await fetch(`get-param-values.php?country_id=${countryId}&category_id=${categoryId}&param_id=${paramId}`, {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                const data = await response.json();
+
+                console.log('Param values response:', { ok: response.ok, status: response.status, dataLength: data?.length });
+
+                if (!response.ok) {
+                    console.error('API error:', data);
+                    throw new Error(data.error || 'Failed to load param values');
+                }
+
+                if (Array.isArray(data) && data.length > 0) {
+                    // Real data loaded successfully
+                    paramValuesSelect.innerHTML = '';
+                    data.forEach(value => {
+                        // Use translated value if available, otherwise use original display_value
+                        const displayValue = value.display_value_translated || value.display_value || value.translated_value || value.original_value || value.value;
+                        const usageInfo = value.usage_count ? ` (${value.usage_count.toLocaleString()} ads)` : '';
+                        paramValuesSelect.innerHTML += `<option value="${value.id}">${displayValue}${usageInfo}</option>`;
+                    });
+                    paramValuesSelect.disabled = false;
+                    console.log(`✅ Loaded ${data.length} real values for parameter ${paramId}`);
+                    return;
+                } else if (Array.isArray(data) && data.length === 0) {
+                    // API returned empty array
+                    paramValuesSelect.innerHTML = '<option value="">No values found in database</option>';
+                    paramValuesSelect.disabled = true;
+                    console.warn(`⚠️ Parameter ${paramId} has no values in database`);
+                    return;
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    console.error('Param values request timed out after 30 seconds');
+                    paramValuesSelect.innerHTML = '<option value="">⚠️ Request timed out (DB index needed)</option>';
+                } else {
+                    console.error('Failed to load real param values:', error);
+                }
+            }
+
+            // Fallback to mock data (only if DB fails)
+            const values = mockData.paramValues[paramId] || [];
+            if (values.length > 0) {
+                paramValuesSelect.innerHTML = '';
+                values.forEach(value => {
+                    paramValuesSelect.innerHTML += `<option value="${value.id}">${value.value} (MOCK)</option>`;
+                });
+                paramValuesSelect.disabled = false;
+                console.log(`⚠️ Using ${values.length} mock values for parameter ${paramId}`);
+            } else {
+                paramValuesSelect.innerHTML = '<option value="">No values available</option>';
+                paramValuesSelect.disabled = true;
+                console.warn(`❌ No values found for parameter ${paramId} (neither real nor mock)`);
+            }
+        });
+
+        async function searchDemo() {
+            const countryId = document.getElementById('country').value;
+            const categoryId = document.getElementById('categorySearch').value;
+            const paramSelect = document.getElementById('param');
+            const paramValuesSelect = document.getElementById('paramValues');
+
+            // Validation
+            if (!countryId) {
+                alert('Please select a country first');
+                return;
+            }
+            if (!categoryId) {
+                alert('Please select a category first');
+                return;
+            }
+            if (!paramSelect.value) {
+                alert('Please select a parameter');
+                return;
+            }
+            if (paramValuesSelect.selectedOptions.length === 0) {
+                alert('Please select at least one parameter value');
+                return;
+            }
+
+            // Get selected param value IDs
+            const selectedValueIds = Array.from(paramValuesSelect.selectedOptions).map(opt => opt.value);
+            const paramValueIds = selectedValueIds.join(',');
+
+            // Show loading
+            const tbody = document.getElementById('resultsTable');
+            const resultsCount = document.getElementById('resultsCount');
+            const searchBtn = document.getElementById('searchBtn');
+
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: #6e6e73;">
+                        🔍 Searching ads... Please wait...
+                    </td>
+                </tr>
+            `;
+            searchBtn.disabled = true;
+            searchBtn.textContent = 'Searching...';
+
+            try {
+                // Call real search API
+                const response = await fetch(
+                    `search-unlinked-ads.php?country_id=${countryId}&category_id=${categoryId}&param_id=${paramSelect.value}&param_value_ids=${paramValueIds}`
+                );
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Search failed');
+                }
+
+                // Extract results from response
+                const results = data.results || [];
+
+                // Store results for export
+                lastSearchResults = results;
+
+                // Update results count
+                resultsCount.textContent = `Found ${data.total || 0} ads`;
+
+                // Populate results table
+                if (results.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px; color: #6e6e73;">
+                                ✅ No ads found matching your criteria.
+                                <br><br>
+                                This means all ads mentioning these values already have the parameter linked!
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                tbody.innerHTML = results.map(row => {
+                    const chips = row.matched_values.split(',').map(v =>
+                        `<span class="chip">${v.trim()}</span>`
+                    ).join(' ');
+
+                    const matchClass = row.match_count > 1 ? 'multiple' : 'single';
+                    const date = new Date(row.created_time * 1000).toLocaleDateString('ru-RU');
+                    // Use URL from API response (includes domain and slug)
+                    const adUrl = row.url || `https://lalafo.kg/ad/${row.ad_id}`;
+
+                    return `
+                        <tr>
+                            <td>
+                                <a href="${adUrl}" target="_blank" class="ad-link">
+                                    ${row.ad_id}
+                                </a>
+                            </td>
+                            <td style="max-width: 300px;">
+                                ${row.title}
+                            </td>
+                            <td style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                ${row.description}
+                            </td>
+                            <td>${chips}</td>
+                            <td>
+                                <span class="match-count ${matchClass}">${row.match_count}</span>
+                            </td>
+                            <td>${date}</td>
+                            <td>
+                                <a href="${adUrl}" target="_blank" class="ad-link">
+                                    View →
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+                console.log(`✅ Found ${results.length} ads with unlinked parameters`);
+
+            } catch (error) {
+                console.error('Search error:', error);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #d32f2f;">
+                            ❌ Search failed: ${error.message}
+                            <br><br>
+                            Check browser console for details.
+                        </td>
+                    </tr>
+                `;
+                resultsCount.textContent = 'Search failed';
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.textContent = 'Search Ads';
+            }
+        }
+
+        function exportDemo() {
+            // Check if there are results to export
+            if (lastSearchResults.length === 0) {
+                alert('Please run a search first to generate results for export');
+                return;
+            }
+
+            const countryId = document.getElementById('country').value;
+            const categoryId = document.getElementById('categorySearch').value;
+            const paramId = document.getElementById('param').value;
+
+            // Build CSV content
+            const csvRows = [
+                ['Ad ID', 'Title', 'Description', 'Matched Values', 'Match Count', 'Created Date', 'URL'],
+                ...lastSearchResults.map(row => {
+                    const date = new Date(row.created_time * 1000).toLocaleDateString('ru-RU');
+                    const adUrl = row.title_slug ? `https://lalafo.kg/${row.title_slug}-${row.ad_id}` : `https://lalafo.kg/ad/${row.ad_id}`;
+                    return [
+                        row.ad_id,
+                        `"${row.title.replace(/"/g, '""')}"`,
+                        `"${row.description.replace(/"/g, '""')}"`,
+                        `"${row.matched_values}"`,
+                        row.match_count,
+                        date,
+                        adUrl
+                    ];
+                })
+            ];
+
+            const csvContent = csvRows.map(row => row.join(',')).join('\n');
+
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `ads-unlinked-params-country${countryId}-cat${categoryId}-param${paramId}-${Date.now()}.csv`;
+            link.click();
+
+            console.log(`✅ Exported ${lastSearchResults.length} ads to CSV`);
+        }
+    </script>
+</body>
+</html>

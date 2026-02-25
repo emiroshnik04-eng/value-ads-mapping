@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Complete Workflow Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; }
+        h1 { color: #333; }
+        .test-section { margin: 30px 0; padding: 20px; background: #f9f9f9; border-radius: 6px; }
+        .test-section h2 { color: #4caf50; margin-top: 0; }
+        button { background: #4caf50; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        button:hover { background: #45a049; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .results { margin-top: 20px; }
+        .success { color: #4caf50; }
+        .error { color: #f44336; }
+        .info { color: #2196f3; }
+        pre { background: #f5f5f5; padding: 15px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #4caf50; color: white; }
+        tr:hover { background: #f5f5f5; }
+        .chip { background: #e8f5e9; color: #2e7d32; padding: 4px 10px; border-radius: 12px; font-size: 11px; margin: 0 3px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Complete Workflow Test</h1>
+        <p>Testing the full Ads Parameter Matcher system with real data and translations.</p>
+
+        <!-- Test 1: Get Countries -->
+        <div class="test-section">
+            <h2>Test 1: Get Countries</h2>
+            <button onclick="testGetCountries()">Run Test</button>
+            <div id="test1-results" class="results"></div>
+        </div>
+
+        <!-- Test 2: Get Category -->
+        <div class="test-section">
+            <h2>Test 2: Get Category (7859 - Baby monitors)</h2>
+            <button onclick="testGetCategory()">Run Test</button>
+            <div id="test2-results" class="results"></div>
+        </div>
+
+        <!-- Test 3: Get Parameters -->
+        <div class="test-section">
+            <h2>Test 3: Get Parameters for Category 7859</h2>
+            <button onclick="testGetParams()">Run Test</button>
+            <div id="test3-results" class="results"></div>
+        </div>
+
+        <!-- Test 4: Get Param Values -->
+        <div class="test-section">
+            <h2>Test 4: Get Param Values (param_id=29 - Condition)</h2>
+            <button onclick="testGetParamValues()">Run Test</button>
+            <div id="test4-results" class="results"></div>
+        </div>
+
+        <!-- Test 5: Search Unlinked Ads -->
+        <div class="test-section">
+            <h2>Test 5: Search Unlinked Ads (Condition = New/Used)</h2>
+            <p class="info">Searching for ads in category 7859 that mention "новый" or "б/у" but don't have Condition parameter linked</p>
+            <button onclick="testSearchAds()">Run Test</button>
+            <div id="test5-results" class="results"></div>
+        </div>
+
+        <!-- Test 6: Full Integration -->
+        <div class="test-section">
+            <h2>Test 6: Full Integration Test</h2>
+            <button onclick="runAllTests()">Run All Tests</button>
+            <div id="test6-results" class="results"></div>
+        </div>
+    </div>
+
+    <script>
+        async function testGetCountries() {
+            const resultsDiv = document.getElementById('test1-results');
+            resultsDiv.innerHTML = '<p>Loading...</p>';
+
+            try {
+                const response = await fetch('get-countries.php');
+                const data = await response.json();
+
+                resultsDiv.innerHTML = `
+                    <p class="success">✅ Success! Found ${data.length} countries</p>
+                    <pre>${JSON.stringify(data.slice(0, 3), null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testGetCategory() {
+            const resultsDiv = document.getElementById('test2-results');
+            resultsDiv.innerHTML = '<p>Loading...</p>';
+
+            try {
+                const response = await fetch('get-category.php?category_id=7859&country_id=12');
+                const data = await response.json();
+
+                resultsDiv.innerHTML = `
+                    <p class="success">✅ Success!</p>
+                    <table>
+                        <tr><th>Field</th><th>Value</th></tr>
+                        <tr><td>ID</td><td>${data.id}</td></tr>
+                        <tr><td>Name (English)</td><td>${data.name}</td></tr>
+                        <tr><td>Name (Translated)</td><td><b>${data.name_translated}</b></td></tr>
+                        <tr><td>Ads Count</td><td>${data.ads_count}</td></tr>
+                        <tr><td>Is Leaf</td><td>${data.is_leaf ? 'Yes' : 'No'}</td></tr>
+                    </table>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testGetParams() {
+            const resultsDiv = document.getElementById('test3-results');
+            resultsDiv.innerHTML = '<p>Loading...</p>';
+
+            try {
+                const response = await fetch('get-params.php?country_id=12&category_id=7859');
+                const data = await response.json();
+
+                resultsDiv.innerHTML = `
+                    <p class="success">✅ Success! Found ${data.length} parameters</p>
+                    <table>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name (English)</th>
+                            <th>Name (Translated)</th>
+                            <th>Status</th>
+                        </tr>
+                        ${data.map(p => `
+                            <tr>
+                                <td>${p.id}</td>
+                                <td>${p.name}</td>
+                                <td><b>${p.name_translated}</b></td>
+                                <td>${p.status_id}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testGetParamValues() {
+            const resultsDiv = document.getElementById('test4-results');
+            resultsDiv.innerHTML = '<p>Loading...</p>';
+
+            try {
+                const response = await fetch('get-param-values.php?country_id=12&category_id=7859&param_id=29');
+                const data = await response.json();
+
+                resultsDiv.innerHTML = `
+                    <p class="success">✅ Success! Found ${data.length} values</p>
+                    <table>
+                        <tr>
+                            <th>ID</th>
+                            <th>English Value</th>
+                            <th>Translated Value</th>
+                            <th>Usage Count</th>
+                        </tr>
+                        ${data.slice(0, 5).map(v => `
+                            <tr>
+                                <td>${v.id}</td>
+                                <td>${v.display_value}</td>
+                                <td><b>${v.display_value_translated}</b></td>
+                                <td>${v.usage_count.toLocaleString()}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testSearchAds() {
+            const resultsDiv = document.getElementById('test5-results');
+            resultsDiv.innerHTML = '<p>🔍 Searching ads... Please wait...</p>';
+
+            try {
+                const response = await fetch('search-unlinked-ads.php?country_id=12&category_id=7859&param_id=29&param_value_ids=2757,2756');
+                const data = await response.json();
+
+                if (data.results.length === 0) {
+                    resultsDiv.innerHTML = `
+                        <p class="info">ℹ️ Found ${data.total} ads (all ads mentioning these values already have the parameter linked)</p>
+                    `;
+                    return;
+                }
+
+                resultsDiv.innerHTML = `
+                    <p class="success">✅ Success! Found ${data.total} ads without parameter linked</p>
+                    <table>
+                        <tr>
+                            <th>Ad ID</th>
+                            <th>Title</th>
+                            <th>Matched Values</th>
+                            <th>Match Count</th>
+                            <th>URL</th>
+                        </tr>
+                        ${data.results.map(row => `
+                            <tr>
+                                <td>${row.ad_id}</td>
+                                <td style="max-width: 300px;">${row.title}</td>
+                                <td>${row.matched_values.split(',').map(v => `<span class="chip">${v.trim()}</span>`).join('')}</td>
+                                <td>${row.match_count}</td>
+                                <td><a href="${row.url}" target="_blank">Open</a></td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        async function runAllTests() {
+            const resultsDiv = document.getElementById('test6-results');
+            resultsDiv.innerHTML = '<p>Running all tests...</p>';
+
+            const tests = [
+                { name: 'Get Countries', fn: () => fetch('get-countries.php') },
+                { name: 'Get Category', fn: () => fetch('get-category.php?category_id=7859&country_id=12') },
+                { name: 'Get Parameters', fn: () => fetch('get-params.php?country_id=12&category_id=7859') },
+                { name: 'Get Param Values', fn: () => fetch('get-param-values.php?country_id=12&category_id=7859&param_id=29') },
+                { name: 'Search Ads', fn: () => fetch('search-unlinked-ads.php?country_id=12&category_id=7859&param_id=29&param_value_ids=2757,2756') },
+            ];
+
+            let html = '<table><tr><th>Test</th><th>Status</th><th>Time</th></tr>';
+
+            for (const test of tests) {
+                const start = Date.now();
+                try {
+                    const response = await test.fn();
+                    const data = await response.json();
+                    const time = Date.now() - start;
+
+                    const status = response.ok ? '✅ Pass' : '❌ Fail';
+                    html += `<tr><td>${test.name}</td><td class="${response.ok ? 'success' : 'error'}">${status}</td><td>${time}ms</td></tr>`;
+                } catch (error) {
+                    const time = Date.now() - start;
+                    html += `<tr><td>${test.name}</td><td class="error">❌ Error</td><td>${time}ms</td></tr>`;
+                }
+            }
+
+            html += '</table>';
+            html += '<p class="success" style="margin-top: 20px;">✅ All tests completed!</p>';
+
+            resultsDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

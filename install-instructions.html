@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Инструкция по установке PHP</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 40px;
+        }
+        .alert {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+        .alert-error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        .step {
+            background: #f8f9fa;
+            padding: 30px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            border-left: 5px solid #667eea;
+        }
+        .step h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        .button {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 15px 40px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin: 10px 5px;
+            transition: transform 0.2s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .button-success {
+            background: #28a745;
+        }
+        .code {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+        ul li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+        ul li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚠️ PHP не установлен</h1>
+            <p>Для работы интерфейса нужно установить PHP</p>
+        </div>
+
+        <div class="content">
+            <div class="alert alert-error">
+                <strong>Ошибка:</strong> Не удается получить доступ к сайту (ERR_CONNECTION_REFUSED)<br>
+                <strong>Причина:</strong> PHP не найден на вашем компьютере
+            </div>
+
+            <div class="step">
+                <h2><span class="step-number">1</span>Скачайте XAMPP (РЕКОМЕНДУЕТСЯ)</h2>
+                <p>XAMPP - это пакет включающий Apache, PHP, MySQL. Нам нужен только PHP.</p>
+                <a href="https://www.apachefriends.org/download.html" class="button" target="_blank">
+                    📥 Скачать XAMPP
+                </a>
+                <ul>
+                    <li>Выберите версию для Windows</li>
+                    <li>Размер: ~150 MB</li>
+                    <li>Время установки: 3-5 минут</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <h2><span class="step-number">2</span>Установите XAMPP</h2>
+                <ul>
+                    <li>Запустите скачанный файл</li>
+                    <li>Путь установки: <code>C:\xampp</code> (по умолчанию)</li>
+                    <li>Компоненты: можно выбрать только <strong>Apache</strong> и <strong>PHP</strong></li>
+                    <li>Нажимайте Next → Next → Install</li>
+                    <li>Дождитесь окончания установки</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <h2><span class="step-number">3</span>Запустите сервер</h2>
+                <p>После установки XAMPP вернитесь в папку:</p>
+                <div class="code">d:\monorepa\monorepa\projects\catalog-microservice\api\web\admin\</div>
+                <p>И дважды кликните на файл:</p>
+                <div class="code">START_HERE.bat</div>
+                <p>Сервер запустится автоматически и откроет браузер! ✅</p>
+            </div>
+
+            <div class="alert">
+                <strong>💡 Совет:</strong> После установки создайте ярлык <code>START_HERE.bat</code> на рабочем столе для быстрого доступа в будущем.
+            </div>
+
+            <h3 style="margin: 30px 0 20px 0; color: #667eea;">Альтернативные варианты:</h3>
+
+            <div class="step">
+                <h2>Вариант A: Только PHP (без Apache)</h2>
+                <a href="https://windows.php.net/download/" class="button" target="_blank">
+                    📥 Скачать PHP
+                </a>
+                <ul>
+                    <li>Выберите: VS16 x64 Thread Safe (zip)</li>
+                    <li>Распакуйте в C:\php</li>
+                    <li>Добавьте C:\php в PATH</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <h2>Вариант B: Docker</h2>
+                <p>Если у вас установлен Docker Desktop:</p>
+                <div class="code">cd d:\monorepa\monorepa\projects\catalog-microservice\docker
+docker-compose up -d</div>
+                <p>Затем откройте: <a href="http://catalog.lalafo.loc/admin/ads-param-matcher.html">http://catalog.lalafo.loc/admin/ads-param-matcher.html</a></p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>После установки PHP все файлы START_HERE.bat и START_HIDDEN.vbs будут работать автоматически</p>
+            <p style="margin-top: 10px; font-size: 14px;">Catalog Microservice Admin Panel</p>
+        </div>
+    </div>
+</body>
+</html>

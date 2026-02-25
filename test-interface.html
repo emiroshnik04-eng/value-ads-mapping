@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interface Auto-Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1e1e1e; color: #d4d4d4; }
+        .test { margin: 10px 0; padding: 10px; background: #2d2d2d; border-left: 4px solid #4caf50; }
+        .pass { border-left-color: #4caf50; }
+        .fail { border-left-color: #f44336; }
+        .loading { border-left-color: #ff9800; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Ads Parameter Matcher - Auto Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        function log(message, status = 'loading') {
+            const div = document.createElement('div');
+            div.className = `test ${status}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+            return div;
+        }
+        
+        async function runTests() {
+            // Test 1: Category validation
+            const test1 = log('Test 1: Validating category 1343...', 'loading');
+            try {
+                const response = await fetch('get-category.php?category_id=1343');
+                const data = await response.json();
+                if (data.id === 1343 && data.ads_count > 0) {
+                    test1.className = 'test pass';
+                    test1.innerHTML = `✅ Test 1 PASSED: Category "${data.name}" has ${data.ads_count.toLocaleString()} ads`;
+                } else {
+                    throw new Error('Invalid category data');
+                }
+            } catch (error) {
+                test1.className = 'test fail';
+                test1.innerHTML = `❌ Test 1 FAILED: ${error.message}`;
+            }
+            
+            // Test 2: Parameters loading
+            const test2 = log('Test 2: Loading parameters for category 1343...', 'loading');
+            try {
+                const response = await fetch('get-params.php?country_id=12&category_id=1343');
+                const data = await response.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    const brandParam = data.find(p => p.id === 1071);
+                    if (brandParam) {
+                        test2.className = 'test pass';
+                        test2.innerHTML = `✅ Test 2 PASSED: Found ${data.length} parameters, including "${brandParam.name}" (${brandParam.usage_count.toLocaleString()} ads)`;
+                    } else {
+                        throw new Error('Brand parameter not found');
+                    }
+                } else {
+                    throw new Error('No parameters returned');
+                }
+            } catch (error) {
+                test2.className = 'test fail';
+                test2.innerHTML = `❌ Test 2 FAILED: ${error.message}`;
+            }
+            
+            // Test 3: Parameter values loading (THE CRITICAL TEST)
+            const test3 = log('Test 3: Loading param values (param 1071)...', 'loading');
+            const startTime = Date.now();
+            try {
+                const response = await fetch('get-param-values.php?country_id=12&category_id=1343&param_id=1071');
+                const data = await response.json();
+                const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    const hasUsageCount = data.every(v => v.usage_count > 0);
+                    if (hasUsageCount) {
+                        test3.className = 'test pass';
+                        test3.innerHTML = `✅ Test 3 PASSED: Loaded ${data.length} values in ${duration}s<br>Top 3: ${data.slice(0,3).map(v => `${v.display_value} (${v.usage_count.toLocaleString()} ads)`).join(', ')}`;
+                    } else {
+                        throw new Error('Missing usage_count in values');
+                    }
+                } else {
+                    throw new Error('No values returned');
+                }
+            } catch (error) {
+                test3.className = 'test fail';
+                test3.innerHTML = `❌ Test 3 FAILED: ${error.message}`;
+            }
+            
+            // Test 4: Search unlinked ads
+            const test4 = log('Test 4: Searching ads without Brand parameter...', 'loading');
+            try {
+                const response = await fetch('search-unlinked-ads.php?country_id=12&category_id=1343&param_id=1071&param_value_ids=21633,21618');
+                const data = await response.json();
+                if (Array.isArray(data)) {
+                    test4.className = 'test pass';
+                    test4.innerHTML = `✅ Test 4 PASSED: Found ${data.length} ads mentioning Lenovo/Apple without Brand parameter linked`;
+                } else {
+                    throw new Error('Invalid search response');
+                }
+            } catch (error) {
+                test4.className = 'test fail';
+                test4.innerHTML = `❌ Test 4 FAILED: ${error.message}`;
+            }
+            
+            // Summary
+            const passed = document.querySelectorAll('.pass').length;
+            const failed = document.querySelectorAll('.fail').length;
+            const summary = log(`<br><strong>SUMMARY: ${passed}/4 tests passed, ${failed} failed</strong>`, passed === 4 ? 'pass' : 'fail');
+            
+            if (passed === 4) {
+                summary.innerHTML += '<br><br>🎉 ALL TESTS PASSED! Interface is ready for use.';
+            } else {
+                summary.innerHTML += '<br><br>⚠️ Some tests failed. Check the errors above.';
+            }
+        }
+        
+        runTests();
+    </script>
+</body>
+</html>

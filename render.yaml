@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: catalog-admin
+    runtime: docker
+    dockerfilePath: ./Dockerfile.render
+    dockerContext: .
+    region: oregon
+    plan: free
+    envVars:
+      - key: DB_HOST
+        value: reporting.dba.yallasvc.net
+      - key: DB_PORT
+        value: 5432
+      - key: DB_NAME
+        value: catalog_microservice
+      - key: DB_USER
+        value: ekaterina_miroshnik
+      - key: DB_PASSWORD
+        sync: false  # Will be set manually in Render dashboard
+    healthCheckPath: /test-db.php

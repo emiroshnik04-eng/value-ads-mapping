@@ -1,0 +1,89 @@
+# Production Dockerfile for Render.com
+FROM php:8.3-fpm-alpine
+
+# Install system dependencies
+RUN apk add --no-cache \
+    bash \
+    nginx \
+    supervisor \
+    postgresql-dev \
+    && docker-php-ext-install pdo pdo_pgsql opcache
+
+# Configure PHP for production
+RUN echo "expose_php = Off" >> /usr/local/etc/php/conf.d/security.ini \
+    && echo "display_errors = Off" >> /usr/local/etc/php/conf.d/security.ini \
+    && echo "log_errors = On" >> /usr/local/etc/php/conf.d/security.ini
+
+# Configure PHP-FPM
+RUN echo "[www]" > /usr/local/etc/php-fpm.d/zz-docker.conf \
+    && echo "listen = 127.0.0.1:9000" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
+    && echo "pm = dynamic" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
+    && echo "pm.max_children = 5" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
+    && echo "pm.start_servers = 2" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
+    && echo "pm.min_spare_servers = 1" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
+    && echo "pm.max_spare_servers = 3" >> /usr/local/etc/php-fpm.d/zz-docker.conf
+
+# Configure nginx
+RUN mkdir -p /var/www/html && \
+    rm -f /etc/nginx/http.d/default.conf
+
+COPY <<'EOF' /etc/nginx/http.d/app.conf
+server {
+    listen 10000;
+    server_name _;
+    root /var/www/html;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}
+EOF
+
+# Configure supervisor
+COPY <<'EOF' /etc/supervisord.conf
+[supervisord]
+nodaemon=true
+user=root
+logfile=/dev/stdout
+logfile_maxbytes=0
+
+[program:php-fpm]
+command=php-fpm
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+autorestart=true
+
+[program:nginx]
+command=nginx -g 'daemon off;'
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+autorestart=true
+EOF
+
+# Copy application files
+WORKDIR /var/www/html
+COPY . /var/www/html/
+
+# Set permissions
+RUN chown -R nobody:nobody /var/www/html && \
+    chmod -R 755 /var/www/html
+
+EXPOSE 10000
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]

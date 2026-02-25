@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Country Filter</title>
+</head>
+<body>
+    <h1>Test Country Filter</h1>
+
+    <label for="country">Country:</label>
+    <select id="country">
+        <option value="">Select country...</option>
+        <option value="1">Kyrgyzstan (KG)</option>
+        <option value="2">Serbia (RS)</option>
+        <option value="3">Poland (PL)</option>
+        <option value="4">Azerbaijan (AZ)</option>
+    </select>
+
+    <div id="output"></div>
+
+    <script src="all-categories.js"></script>
+    <script>
+        const output = document.getElementById('output');
+
+        // Check if ALL_LEAF_CATEGORIES loaded
+        if (typeof ALL_LEAF_CATEGORIES === 'undefined') {
+            output.innerHTML = '<p style="color: red;">ERROR: ALL_LEAF_CATEGORIES not loaded!</p>';
+        } else {
+            output.innerHTML = `<p style="color: green;">✓ ALL_LEAF_CATEGORIES loaded: ${ALL_LEAF_CATEGORIES.length} categories</p>`;
+        }
+
+        const mockData = {
+            categories: {
+                '1': ALL_LEAF_CATEGORIES,
+                '2': ALL_LEAF_CATEGORIES,
+                '3': ALL_LEAF_CATEGORIES,
+                '4': ALL_LEAF_CATEGORIES
+            }
+        };
+
+        document.getElementById('country').addEventListener('change', function() {
+            const countryId = this.value;
+
+            if (!countryId) {
+                output.innerHTML += '<p>No country selected</p>';
+                return;
+            }
+
+            const categories = mockData.categories[countryId] || [];
+            output.innerHTML += `<p><strong>Country ${countryId} selected:</strong> ${categories.length} categories loaded</p>`;
+            output.innerHTML += `<p>First 5 categories:</p><ul>`;
+            categories.slice(0, 5).forEach(cat => {
+                output.innerHTML += `<li>${cat.name}</li>`;
+            });
+            output.innerHTML += '</ul>';
+        });
+    </script>
+</body>
+</html>
