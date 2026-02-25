@@ -1,5 +1,5 @@
 # Production Dockerfile for Render.com
-# Build: 2026-02-25-v2 (force cache bust)
+# Build: 2026-02-25-v3 (fix PHP-FPM logs to stderr)
 FROM php:8.3-fpm-alpine
 
 # Install system dependencies
@@ -19,16 +19,23 @@ RUN echo "expose_php = Off" >> /usr/local/etc/php/conf.d/security.ini \
 # Remove all default configs first to avoid conflicts
 RUN rm -f /usr/local/etc/php-fpm.d/*.conf && \
     mkdir -p /run/php && \
-    echo "[www]" > /usr/local/etc/php-fpm.d/zz-docker.conf \
+    echo "[global]" > /usr/local/etc/php-fpm.d/zz-docker.conf \
+    && echo "error_log = /proc/self/fd/2" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
+    && echo "" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
+    && echo "[www]" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
     && echo "listen = /run/php/php-fpm.sock" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
     && echo "listen.owner = nobody" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
     && echo "listen.group = nobody" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
     && echo "listen.mode = 0660" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
+    && echo "user = nobody" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
+    && echo "group = nobody" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
     && echo "pm = dynamic" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
     && echo "pm.max_children = 5" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
     && echo "pm.start_servers = 2" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
     && echo "pm.min_spare_servers = 1" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
-    && echo "pm.max_spare_servers = 3" >> /usr/local/etc/php-fpm.d/zz-docker.conf
+    && echo "pm.max_spare_servers = 3" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
+    && echo "access.log = /proc/self/fd/2" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
+    && echo "catch_workers_output = yes" >> /usr/local/etc/php-fpm.d/zz-docker.conf
 
 # Configure nginx
 RUN mkdir -p /var/www/html && \
@@ -68,7 +75,6 @@ logfile_maxbytes=0
 
 [program:php-fpm]
 command=php-fpm -F
-user=nobody
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
