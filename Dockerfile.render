@@ -1,5 +1,5 @@
 # Production Dockerfile for Render.com
-# Build: 2026-02-25-v3 (fix PHP-FPM logs to stderr)
+# Build: 2026-02-25-v4 (run nginx as nobody to fix socket permissions)
 FROM php:8.3-fpm-alpine
 
 # Install system dependencies
@@ -39,7 +39,8 @@ RUN rm -f /usr/local/etc/php-fpm.d/*.conf && \
 
 # Configure nginx
 RUN mkdir -p /var/www/html && \
-    rm -f /etc/nginx/http.d/default.conf
+    rm -f /etc/nginx/http.d/default.conf && \
+    sed -i 's/user nginx;/user nobody;/' /etc/nginx/nginx.conf
 
 COPY <<'EOF' /etc/nginx/http.d/app.conf
 server {
