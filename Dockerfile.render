@@ -16,7 +16,7 @@ RUN echo "expose_php = Off" >> /usr/local/etc/php/conf.d/security.ini \
 
 # Configure PHP-FPM
 RUN echo "[www]" > /usr/local/etc/php-fpm.d/zz-docker.conf \
-    && echo "listen = 127.0.0.1:9000" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
+    && echo "listen = 127.0.0.1:9001" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
     && echo "pm = dynamic" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
     && echo "pm.max_children = 5" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
     && echo "pm.start_servers = 2" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
@@ -39,7 +39,7 @@ server {
     }
 
     location ~ \.php$ {
-        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_pass 127.0.0.1:9001;
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         include fastcgi_params;
